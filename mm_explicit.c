@@ -51,6 +51,22 @@ void remove_freenode(char *ptr);            // 가용리스트 연결 포인터 
 static char *heap_listp = 0;                // 힙의 시작 주소
 static char *root = 0;                      // 명시적 가용 리스트의 첫 노드
 
+/*
+ * Allocated Block          Free Block
+ *  ---------               ---------
+ * | HEADER  |             | HEADER  |
+ *  ---------               ---------
+ * |         |             |  NEXT   |
+ * |         |              ---------
+ * | PAYLOAD |             |  PREV   |
+ * |         |              ---------
+ * |         |             |         |
+ *  ---------              |         |
+ * | FOOTER  |              ---------
+ *  ---------              | FOOTER  |
+ *                          ---------
+*/
+
 int mm_init(void)       // 최초 가용 블록으로 힙 생성
 {
     if ((heap_listp = mem_sbrk(4*WSIZE)) == (void *)-1) return -1;
@@ -85,9 +101,10 @@ static void *extend_heap(size_t words){ // 두 가지 경우에 호출 (1)힙이
 }
 
 
-/* 
- * mm_malloc - Allocate a block by incrementing the brk pointer.
- *     Always allocate a block whose size is a multiple of the alignment.
+/*
+ * mm_malloc : <stdlib.h>에 있는 malloc()를 explicit 방식으로 구현했다.
+            동적 메모리를 할당하는 함수이다. 
+            asize는 adjust size로 더블워드 정렬을 위해 크기를 조정한다. 
  */
 void *mm_malloc(size_t size)
 {
